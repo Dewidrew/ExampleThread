@@ -14,12 +14,19 @@ public class MainActivity extends AppCompatActivity {
 
     Calendar calendar;
     TextView textView;
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                    textView.setText(String.format("%1$tI:%1$tM:%1tS %1$Tp", calendar));
+            }
+        };
         textView = (TextView) findViewById(R.id.text_1);
         calendar = Calendar.getInstance();
 
@@ -32,15 +39,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         calendar = Calendar.getInstance();
-
-                        textView.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                textView.setText(String.format("%1$tI:%1$tM:%1tS %1$Tp", calendar));
-                            }
-                        });
+                        handler.sendEmptyMessage(0);
+                        handler.postDelayed(this,1000);
                     }
                 }).start();
+
             }
         });
 
