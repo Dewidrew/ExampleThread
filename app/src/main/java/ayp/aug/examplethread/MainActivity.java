@@ -1,5 +1,6 @@
 package ayp.aug.examplethread;
 
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -14,19 +15,12 @@ public class MainActivity extends AppCompatActivity {
 
     Calendar calendar;
     TextView textView;
-    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        handler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                    textView.setText(String.format("%1$tI:%1$tM:%1tS %1$Tp", calendar));
-            }
-        };
         textView = (TextView) findViewById(R.id.text_1);
         calendar = Calendar.getInstance();
 
@@ -35,17 +29,30 @@ public class MainActivity extends AppCompatActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        calendar = Calendar.getInstance();
-                        handler.sendEmptyMessage(0);
-                        handler.postDelayed(this,1000);
-                    }
-                }).start();
-
+                ExampleAsyncTask exampleAsyncTask = new ExampleAsyncTask();
+                exampleAsyncTask.execute();
             }
         });
 
+    }
+
+    private class ExampleAsyncTask extends AsyncTask<Void, Void, Calendar> {
+        @Override
+        protected Calendar doInBackground(Void... voids) {
+            calendar = Calendar.getInstance();
+            return calendar;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+
+        }
+
+        @Override
+        protected void onPostExecute(Calendar calendar) {
+            super.onPostExecute(calendar);
+            textView.setText(String.format("%1$tI:%1$tM:%1tS %1$Tp", calendar));
+        }
     }
 }
