@@ -14,37 +14,52 @@ import javax.net.ssl.HandshakeCompletedListener;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    private static final int CODE_HANDLER = 1234;
     public TextView txtView;
-
-    public Handler handler;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-         handler = new Handler(){
-             @Override
-             public void handleMessage(Message msg) {
-                 if(msg.what == CODE_HANDLER){
-                     txtView.setText(msg.obj.toString());
-                 }
-             }
-         };
-
-
         txtView = (TextView)findViewById(R.id.text_1);
         txtView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Message msg = handler.obtainMessage(CODE_HANDLER,new Object());
-                msg.sendToTarget();
-
+                ExampleTask exampleTask = new ExampleTask();
+                exampleTask.execute(1);
             }
         });
 
+    }
+
+    public class ExampleTask extends AsyncTask<Integer,Integer,String>{
+
+        @Override
+        protected String doInBackground(Integer... args) {
+            int i = args[0]; // i = 1;
+            while(true){
+                i++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                publishProgress(i); //invoke UI Thread to onProgressUpdate
+                if(i == 100){
+                    break;
+                }
+            }
+
+            return "Hello";
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            txtView.setText(values[0].toString());
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            txtView.setText(s);
+        }
     }
 }
